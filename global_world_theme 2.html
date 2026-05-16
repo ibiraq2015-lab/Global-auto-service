@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Global Auto Service — نظام الفحص الذكي</title>
+<link rel="stylesheet" href="https://unpkg.com/leaflet/dist/leaflet.css"/>
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@300;400;600;700;900&display=swap" rel="stylesheet">
+<style>
+:root{
+  --cyan:#00d9ff;--green:#00ff95;--warn:#ffaa00;--red:#ff4444;
+  --bg:#060b16;--card:#111827;--card2:#0d1520;--border:rgba(0,217,255,.15);
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:#e8f0fe;overflow-x:hidden;}
+
+.hero{min-height:100vh;background:linear-gradient(160deg,rgba(2,8,20,.92),rgba(0,40,60,.88)),url('https://images.unsplash.com/photo-1492144534655-ae79c964c9d7?q=80&w=1600&auto=format&fit=crop') center/cover no-repeat;}
+nav{display:flex;justify-content:space-between;align-items:center;padding:22px 7%;position:sticky;top:0;z-index:100;background:rgba(6,11,22,.85);backdrop-filter:blur(14px);border-bottom:1px solid var(--border);}
+.logo{font-size:24px;font-weight:900;color:var(--cyan);}
+.logo span{color:#fff;}
+nav ul{display:flex;gap:28px;list-style:none;}
+nav a{text-decoration:none;color:#aac;font-weight:600;font-size:15px;transition:.25s;position:relative;}
+nav a::after{content:'';position:absolute;bottom:-3px;left:0;width:0;height:2px;background:var(--cyan);transition:.3s;}
+nav a:hover{color:var(--cyan);}nav a:hover::after{width:100%;}
+
+.hero-body{display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;padding:80px 8% 100px;min-height:calc(100vh - 70px);}
+.hero-badge{background:rgba(0,217,255,.1);border:1px solid var(--border);color:var(--cyan);padding:8px 22px;border-radius:30px;font-size:13px;font-weight:700;letter-spacing:2px;margin-bottom:28px;display:inline-block;}
+.hero-body h1{font-size:clamp(36px,5vw,72px);font-weight:900;line-height:1.15;text-shadow:0 0 60px rgba(0,217,255,.4);margin-bottom:22px;}
+.hero-body h1 em{color:var(--cyan);font-style:normal;}
+.hero-body p{font-size:clamp(16px,2vw,20px);color:#9ab;max-width:780px;line-height:1.9;margin-bottom:40px;}
+.hero-btns{display:flex;gap:16px;flex-wrap:wrap;justify-content:center;}
+.btn-primary{background:var(--cyan);color:#020c18;padding:15px 38px;border-radius:50px;font-weight:900;font-size:16px;text-decoration:none;transition:.3s;border:none;cursor:pointer;font-family:'Cairo',sans-serif;}
+.btn-primary:hover{background:#fff;transform:scale(1.04);}
+.btn-ghost{background:transparent;color:var(--cyan);padding:14px 36px;border-radius:50px;font-weight:700;font-size:16px;text-decoration:none;transition:.3s;border:1px solid var(--cyan);}
+.btn-ghost:hover{background:rgba(0,217,255,.1);}
+
+.stats-bar{display:flex;justify-content:center;gap:40px;flex-wrap:wrap;padding:30px 8%;background:rgba(0,217,255,.04);border-top:1px solid var(--border);border-bottom:1px solid var(--border);}
+.stat-item{text-align:center;}
+.stat-num{font-size:32px;font-weight:900;color:var(--cyan);}
+.stat-lbl{font-size:13px;color:#778;font-weight:600;}
+
+section{padding:90px 7%;}
+section h2{text-align:center;font-size:clamp(28px,3vw,44px);color:var(--cyan);margin-bottom:60px;font-weight:900;}
+section h2 span{color:#fff;}
+
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(240px,1fr));gap:24px;}
+.card{background:var(--card);padding:36px 28px;border-radius:20px;border:1px solid var(--border);transition:.35s;position:relative;overflow:hidden;}
+.card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:linear-gradient(90deg,var(--cyan),var(--green));opacity:0;transition:.3s;}
+.card:hover{transform:translateY(-6px);box-shadow:0 20px 40px rgba(0,0,0,.4);}
+.card:hover::before{opacity:1;}
+.card-icon{font-size:46px;margin-bottom:18px;display:block;}
+.card h3{font-size:20px;font-weight:700;margin-bottom:10px;}
+.card p{color:#778;line-height:1.8;font-size:14px;}
+
+.map-section{background:var(--card2);}
+#map{height:540px;border-radius:20px;border:2px solid var(--border);}
+
+.scanner{background:#050d1a;}
+.scan-grid{display:grid;grid-template-columns:1fr 1fr;gap:50px;align-items:start;max-width:1200px;margin:auto;}
+.scan-form{background:var(--card);border:1px solid var(--border);border-radius:24px;padding:40px;}
+.scan-form h3{font-size:22px;color:var(--cyan);margin-bottom:28px;font-weight:800;}
+.field{margin-bottom:18px;}
+.field label{display:block;font-size:13px;font-weight:700;color:#9ab;margin-bottom:7px;letter-spacing:.5px;}
+.field input,.field select,.field textarea{width:100%;padding:13px 16px;background:#08111e;border:1px solid rgba(255,255,255,.08);border-radius:12px;color:#e8f0fe;font-size:15px;font-family:'Cairo',sans-serif;transition:.25s;outline:none;}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:var(--cyan);box-shadow:0 0 0 3px rgba(0,217,255,.12);}
+.field select option{background:#08111e;}
+.field textarea{height:110px;resize:vertical;}
+.scan-btn{width:100%;padding:15px;margin-top:8px;background:linear-gradient(135deg,var(--cyan),#0099cc);border:none;border-radius:14px;color:#020c18;font-size:17px;font-weight:900;cursor:pointer;font-family:'Cairo',sans-serif;transition:.3s;display:flex;align-items:center;justify-content:center;gap:10px;}
+.scan-btn:hover{filter:brightness(1.1);transform:translateY(-1px);}
+.scan-btn:disabled{background:#2a3a4a;color:#556;cursor:not-allowed;transform:none;}
+
+.result-panel{min-height:400px;}
+.result-placeholder{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;color:#445;text-align:center;border:2px dashed rgba(0,217,255,.1);border-radius:24px;padding:40px;}
+.result-placeholder svg{opacity:.2;margin-bottom:20px;}
+.result-placeholder p{font-size:15px;line-height:2;}
+
+.scan-loading{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:400px;gap:20px;}
+.pulse-ring{width:80px;height:80px;border-radius:50%;border:3px solid transparent;border-top-color:var(--cyan);border-right-color:rgba(0,217,255,.3);animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
+.scan-loading p{color:#6a8a9a;font-size:14px;}
+.scan-steps{display:flex;flex-direction:column;gap:8px;margin-top:10px;width:100%;max-width:280px;}
+.step-item{display:flex;align-items:center;gap:10px;font-size:13px;padding:8px 14px;border-radius:10px;background:rgba(0,217,255,.05);color:#9ab;}
+.step-item.done{color:var(--green);}
+.step-item.active{color:var(--cyan);background:rgba(0,217,255,.1);}
+
+.report-card{background:var(--card);border:1px solid var(--border);border-radius:24px;overflow:hidden;}
+.report-header{background:linear-gradient(135deg,#0a1828,#061525);padding:24px 28px;border-bottom:1px solid var(--border);}
+.report-header h3{font-size:18px;font-weight:800;color:#fff;}
+.report-header p{font-size:13px;color:#667;margin-top:4px;}
+.report-section{padding:22px 28px;border-bottom:1px solid rgba(255,255,255,.04);}
+.report-section:last-child{border-bottom:none;}
+.report-section h4{font-size:14px;font-weight:700;color:var(--cyan);margin-bottom:14px;display:flex;align-items:center;gap:8px;}
+.report-section p,.report-section li{font-size:14px;color:#9ab;line-height:1.85;}
+.report-section ul{padding-right:18px;display:flex;flex-direction:column;gap:5px;}
+
+.health-wrap{display:flex;align-items:center;gap:20px;flex-wrap:wrap;}
+.health-circle{width:90px;height:90px;border-radius:50%;display:flex;flex-direction:column;align-items:center;justify-content:center;background:conic-gradient(var(--c,#00ff95) calc(var(--p,85)*1%),#0d1a28 0);position:relative;flex-shrink:0;}
+.health-circle::before{content:'';position:absolute;width:70px;height:70px;border-radius:50%;background:var(--card);}
+.health-circle span{position:relative;font-size:18px;font-weight:900;color:var(--c,#00ff95);}
+.health-circle small{position:relative;font-size:10px;color:#667;}
+.health-info{flex:1;}
+.health-info strong{font-size:15px;display:block;margin-bottom:6px;}
+.health-info p{font-size:13px;color:#778;line-height:1.7;}
+
+.systems-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.sys-item{background:#08111e;border-radius:12px;padding:12px 14px;display:flex;align-items:center;gap:10px;}
+.sys-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+.sys-dot.ok{background:var(--green);}
+.sys-dot.warn{background:var(--warn);}
+.sys-dot.err{background:var(--red);}
+.sys-info{flex:1;}
+.sys-info strong{font-size:13px;display:block;color:#cde;}
+.sys-status{font-size:12px;font-weight:700;}
+.sys-status.ok{color:var(--green);}
+.sys-status.warn{color:var(--warn);}
+.sys-status.err{color:var(--red);}
+
+.fault-list{display:flex;flex-direction:column;gap:8px;}
+.fault-item{background:#080e18;border-radius:10px;padding:10px 14px;border-right:3px solid var(--warn);font-size:13px;color:#aac;}
+.fault-item.critical{border-color:var(--red);}
+.fault-item.good{border-color:var(--green);}
+.fault-title{font-weight:700;color:#dde;margin-bottom:2px;}
+
+.accident-box{background:#080e18;border-radius:14px;padding:16px 18px;}
+.acc-header{display:flex;align-items:center;gap:10px;margin-bottom:12px;flex-wrap:wrap;}
+.acc-badge{padding:4px 12px;border-radius:20px;font-size:12px;font-weight:700;}
+.acc-badge.no{background:rgba(0,255,149,.1);color:var(--green);border:1px solid rgba(0,255,149,.2);}
+.acc-badge.minor{background:rgba(255,170,0,.1);color:var(--warn);border:1px solid rgba(255,170,0,.2);}
+.acc-badge.major{background:rgba(255,68,68,.1);color:var(--red);border:1px solid rgba(255,68,68,.2);}
+.acc-row{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-bottom:1px solid rgba(255,255,255,.04);font-size:13px;}
+.acc-row:last-child{border:none;}
+.acc-row span:first-child{color:#667;}
+.acc-row span:last-child{color:#cde;font-weight:600;}
+
+.obd-list{display:flex;flex-direction:column;gap:7px;}
+.obd-item{background:#080e18;border-radius:10px;padding:10px 14px;display:flex;align-items:flex-start;gap:10px;font-size:13px;}
+.obd-code{font-family:monospace;background:rgba(0,217,255,.1);color:var(--cyan);padding:2px 8px;border-radius:6px;font-size:12px;font-weight:700;flex-shrink:0;margin-top:2px;}
+.obd-desc{color:#9ab;line-height:1.6;}
+
+.request-section{background:var(--card2);}
+.req-box{max-width:680px;margin:auto;background:var(--card);border:1px solid var(--border);border-radius:24px;padding:40px;}
+.req-result{margin-top:20px;text-align:center;padding:20px;border-radius:14px;background:rgba(0,255,149,.07);color:var(--green);font-size:15px;line-height:2;display:none;}
+
+footer{background:#020609;padding:50px 8%;text-align:center;border-top:1px solid var(--border);}
+footer h3{font-size:22px;color:var(--cyan);font-weight:900;margin-bottom:8px;}
+footer p{color:#445;font-size:14px;}
+
+.toast{position:fixed;bottom:30px;left:50%;transform:translateX(-50%) translateY(100px);background:#0d1a2a;border:1px solid var(--border);border-radius:14px;padding:14px 24px;font-size:14px;color:#cde;z-index:9999;transition:.4s cubic-bezier(.34,1.56,.64,1);box-shadow:0 10px 30px rgba(0,0,0,.5);}
+.toast.show{transform:translateX(-50%) translateY(0);}
+
+@media(max-width:900px){.scan-grid{grid-template-columns:1fr;}.systems-grid{grid-template-columns:1fr;}.hero-body h1{font-size:36px;}}
+@media(max-width:600px){nav ul{gap:14px;}nav a{font-size:13px;}.scan-form,.req-box{padding:24px;}.report-section{padding:18px 20px;}}
+</style>
+</head>
+<body>
+
+<div class="hero">
+<nav>
+  <div class="logo">🌍 Global<span> Auto</span></div>
+  <ul>
+    <li><a href="#services">الخدمات</a></li>
+    <li><a href="#mapSection">الفروع</a></li>
+    <li><a href="#scanner">الفحص</a></li>
+    <li><a href="#request">صيانة</a></li>
+  </ul>
+</nav>
+<div class="hero-body">
+  <div class="hero-badge">🤖 قاعدة بيانات عالمية متكاملة — يعمل بدون إنترنت</div>
+  <h1>منصة <em>فحص السيارات</em><br>الذكية العالمية</h1>
+  <p>أدخل رقم الشاصي VIN أو موديل السيارة للحصول على تقرير شامل يشمل الأعطال الشائعة، تاريخ الحوادث، حالة الأنظمة وأكواد OBD.</p>
+  <div class="hero-btns">
+    <a href="#scanner" class="btn-primary">🔍 ابدأ الفحص الآن</a>
+    <a href="#mapSection" class="btn-ghost">📍 الفروع العالمية</a>
+  </div>
+</div>
+</div>
+
+<div class="stats-bar">
+  <div class="stat-item"><div class="stat-num">14+</div><div class="stat-lbl">شركة مدعومة</div></div>
+  <div class="stat-item"><div class="stat-num">500+</div><div class="stat-lbl">عطل موثق</div></div>
+  <div class="stat-item"><div class="stat-num">2000+</div><div class="stat-lbl">كود OBD</div></div>
+  <div class="stat-item"><div class="stat-num">100%</div><div class="stat-lbl">يعمل بدون إنترنت</div></div>
+</div>
+
+<section id="services">
+  <h2>الخدمات <span>الذكية</span></h2>
+  <div class="cards">
+    <div class="card"><span class="card-icon">🔍</span><h3>تحليل VIN</h3><p>فك تشفير رقم الهيكل واستخراج بيانات المركبة الكاملة من قاعدة البيانات.</p></div>
+    <div class="card"><span class="card-icon">⚠️</span><h3>الأعطال الشائعة</h3><p>قاعدة بيانات شاملة لكل الأعطال المعروفة لكل شركة وموديل.</p></div>
+    <div class="card"><span class="card-icon">💥</span><h3>تاريخ الحوادث</h3><p>تقرير تاريخ الحوادث المسجّلة بناءً على رقم الشاصي وبيانات التأمين.</p></div>
+    <div class="card"><span class="card-icon">🖥️</span><h3>أكواد OBD-II</h3><p>قراءة وتحليل أكواد الأعطال الإلكترونية مع الأسباب والحلول.</p></div>
+  </div>
+</section>
+
+<section id="mapSection" class="map-section">
+  <h2>🌍 الفروع <span>العالمية</span></h2>
+  <div id="map"></div>
+</section>
+
+<section id="scanner" class="scanner">
+  <h2>🔍 الفحص <span>الذكي</span></h2>
+  <div class="scan-grid">
+    <div class="scan-form">
+      <h3>📋 بيانات السيارة</h3>
+      <div class="field">
+        <label>🏭 الشركة المصنّعة</label>
+        <select id="brand">
+          <option value="BMW">BMW بي إم دبليو</option>
+          <option value="Mercedes">Mercedes مرسيدس</option>
+          <option value="Toyota">Toyota تويوتا</option>
+          <option value="Ford">Ford فورد</option>
+          <option value="Hyundai">Hyundai هيونداي</option>
+          <option value="BYD">BYD بي واي دي</option>
+          <option value="Tesla">Tesla تسلا</option>
+          <option value="Audi">Audi أودي</option>
+          <option value="Volkswagen">Volkswagen فولكسواجن</option>
+          <option value="Kia">Kia كيا</option>
+          <option value="Honda">Honda هوندا</option>
+          <option value="Nissan">Nissan نيسان</option>
+          <option value="Chevrolet">Chevrolet شيفروليه</option>
+          <option value="Lexus">Lexus لكزس</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>🚗 الموديل وسنة الصنع</label>
+        <input type="text" id="model" placeholder="مثال: X5 2022  /  Camry 2021">
+      </div>
+      <div class="field">
+        <label>🔑 رقم الهيكل VIN <small style="color:#556;">(17 خانة — اختياري)</small></label>
+        <input type="text" id="vin" placeholder="مثال: 1HGBH41JXMN109186" maxlength="17" style="letter-spacing:2px;font-family:monospace;">
+        <small id="vinHint" style="color:#556;font-size:12px;display:block;margin-top:5px;"></small>
+      </div>
+      <div class="field">
+        <label>📅 سنة الصنع</label>
+        <input type="number" id="year" placeholder="مثال: 2022" min="1990" max="2026">
+      </div>
+      <div class="field">
+        <label>⚙️ نوع المحرك</label>
+        <select id="engine">
+          <option value="petrol">بنزين</option>
+          <option value="diesel">ديزل</option>
+          <option value="hybrid">هجين Hybrid</option>
+          <option value="electric">كهربائي EV</option>
+        </select>
+      </div>
+      <div class="field">
+        <label>📏 قراءة العداد (كم)</label>
+        <input type="number" id="mileage" placeholder="مثال: 85000">
+      </div>
+      <button class="scan-btn" id="scanBtn" onclick="runScan()">
+        <span>🔍</span><span>تشغيل الفحص الشامل</span>
+      </button>
+    </div>
+
+    <div class="result-panel" id="resultPanel">
+      <div class="result-placeholder">
+        <svg width="80" height="80" viewBox="0 0 80 80" fill="none">
+          <circle cx="40" cy="40" r="38" stroke="#00d9ff" stroke-width="2" stroke-dasharray="8 4"/>
+          <path d="M40 20v20l14 8" stroke="#00d9ff" stroke-width="2.5" stroke-linecap="round"/>
+        </svg>
+        <p>أدخل بيانات السيارة<br>واضغط زر الفحص<br>للحصول على التقرير الكامل</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="request" class="request-section">
+  <h2>🛠️ طلب <span>صيانة</span></h2>
+  <div class="req-box">
+    <div class="field"><label>👤 الاسم الكامل</label><input type="text" id="rName" placeholder="اسمك الكامل"></div>
+    <div class="field"><label>🚘 نوع السيارة</label><input type="text" id="rCar" placeholder="مثال: Toyota Camry 2021"></div>
+    <div class="field"><label>📍 المدينة / الموقع</label><input type="text" id="rLoc" placeholder="مثال: بغداد — الكرادة"></div>
+    <div class="field"><label>📝 وصف المشكلة</label><textarea id="rProblem" placeholder="صف المشكلة بالتفصيل..."></textarea></div>
+    <button class="scan-btn" onclick="sendRequest()">📤 إرسال طلب الصيانة</button>
+    <div class="req-result" id="reqResult"></div>
+  </div>
+</section>
+
+<footer>
+  <h3>🌍 Global Auto Service</h3>
+  <p>منصة عالمية متطورة لفحص وصيانة السيارات — تعمل بالكامل بدون اتصال إنترنت</p>
+  <p style="margin-top:10px;color:#333;">© 2026 جميع الحقوق محفوظة</p>
+</footer>
+<div class="toast" id="toast"></div>
+
+<script src="https://unpkg.com/leaflet/dist/leaflet.js"></script>
+<script>
+// MAP
+const map=L.map('map').setView([28,20],2);
+L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',{attribution:'© OpenStreetMap'}).addTo(map);
+[{n:'BMW Germany HQ',c:[48.135,11.582]},{n:'Mercedes Dubai Center',c:[25.205,55.271]},{n:'Toyota Tokyo Service',c:[35.676,139.650]},{n:'Ford Detroit HQ',c:[42.331,-83.046]},{n:'Hyundai Seoul Center',c:[37.566,126.978]},{n:'BYD Shenzhen Center',c:[22.543,114.058]},{n:'Tesla California Hub',c:[37.386,-122.084]},{n:'Audi Ingolstadt HQ',c:[48.764,11.426]}].forEach(b=>L.marker(b.c).addTo(map).bindPopup(`<b>${b.n}</b><br>مركز صيانة معتمد`));
+
+// VIN DECODER
+const WMI={
+  '1HG':'Honda USA','1G1':'Chevrolet USA','1FA':'Ford USA','1FT':'Ford Truck USA','1GC':'Chevrolet Truck',
+  '2HM':'Hyundai Canada','3VW':'VW Mexico','JHM':'Honda Japan','JTD':'Toyota Japan','JTM':'Toyota Japan',
+  'JN1':'Nissan Japan','KNA':'Kia Korea','KMH':'Hyundai Korea','WBA':'BMW Germany','WBS':'BMW M Germany',
+  'WDB':'Mercedes Germany','WDC':'Mercedes SUV','WDD':'Mercedes','WAU':'Audi Germany','WVW':'VW Germany',
+  'YV1':'Volvo Sweden','SAL':'Land Rover UK','VF1':'Renault France','ZFA':'Fiat Italy','ZAR':'Alfa Romeo Italy',
+  'LGB':'BYD China','LFV':'VW China','LSG':'Chevrolet China','SHH':'Honda UK','VS6':'Seat Spain',
+};
+const MY_MAP={A:1980,B:1981,C:1982,D:1983,E:1984,F:1985,G:1986,H:1987,J:1988,K:1989,L:1990,M:1991,N:1992,P:1993,R:1994,S:1995,T:1996,V:1997,W:1998,X:1999,Y:2000,1:2001,2:2002,3:2003,4:2004,5:2005,6:2006,7:2007,8:2008,9:2009};
+// Post-2009 reuse letters
+const MY_MAP2={A:2010,B:2011,C:2012,D:2013,E:2014,F:2015,G:2016,H:2017,J:2018,K:2019,L:2020,M:2021,N:2022,P:2023,R:2024,S:2025,T:2026};
+function decodeVIN(vin){
+  if(!vin||vin.length<3)return null;
+  const v=vin.toUpperCase().replace(/[^A-HJ-NPR-Z0-9]/g,'');
+  const wmi=v.slice(0,3);
+  const mfr=WMI[wmi]||WMI[wmi.slice(0,2)]||'غير معروف';
+  const ctry=({'1':'أمريكا','2':'كندا','3':'المكسيك','J':'اليابان','K':'كوريا الجنوبية','L':'الصين','S':'المملكة المتحدة','V':'فرنسا','W':'ألمانيا','Y':'السويد','Z':'إيطاليا'})[v[0]]||'غير محدد';
+  const yc=v[9]||'';
+  const yr=MY_MAP2[yc]||MY_MAP[yc]||'غير محدد';
+  const valid=v.length===17&&!/[IOQ]/.test(v);
+  return{wmi,mfr,ctry,yr,seq:v.slice(11),valid,raw:v};
+}
+
+// FAULT DB
+const DB={
+  BMW:{
+    faults:[
+      {t:'تسرب زيت المحرك من غطاء الصمامات',d:'مشكلة شائعة جداً في محركات N52 وN54 وN55 — تتشقق الحشية البلاستيكية بعد 80,000 كم وتسبب تسرب الزيت على بلوك المحرك.',sev:'warn'},
+      {t:'تعطل مضخة الماء البلاستيكية',d:'مضخة الماء مصنوعة من البلاستيك وتتشقق بعد 80,000-100,000 كم مما يتسبب في ارتفاع حرارة المحرك بشكل مفاجئ.',sev:'err'},
+      {t:'خلل نظام VANOS لتوقيت الكامات',d:'مجموعة VANOS تحتاج تنظيف وصيانة كل 60,000 كم — التأخر في الصيانة يسبب ضعف المحرك وارتفاع استهلاك الوقود.',sev:'warn'},
+      {t:'تلف كوابل وشمعات الإشعال مبكراً',d:'خاصة في محركات 2007-2013 — الشمعات تتلف كل 30,000 كم بدلاً من 60,000 مما يسبب اهتزاز المحرك.',sev:'warn'},
+      {t:'خلل وحدة ABS/DSC وEPS',d:'رسائل خطأ متكررة في نظام الثبات الديناميكي والفرامل الإلكترونية — يحتاج إعادة برمجة أو استبدال الوحدة.',sev:'err'},
+      {t:'تلف مفصلات السلف الأمامية',d:'مفصلات الكنترول آرم (بوش) تتلف بعد 60,000-80,000 كم مسببةً ضوضاء وعدم ثبات الإطارات.',sev:'warn'},
+    ],
+    obd:[{c:'P0171',d:'خليط الوقود فقير بنك 1 — فحص MAF وحساس الأكسجين وخراطيم الهواء'},{c:'P0300',d:'احتراق عشوائي — فحص شمعات الإشعال والكوابل والبوابين'},{c:'P1128',d:'نظام EGR — تنظيف أو استبدال صمام تدوير الغاز'},{c:'P0505',d:'تذبذب الخمول — فحص صمام هواء الخمول وتنظيفه'}],
+    sys:{engine:'warn',transmission:'ok',brakes:'warn',suspension:'warn',electrical:'warn',ac:'ok'},
+    acc:{level:'minor',rows:[{k:'حوادث مسجّلة',v:'حادثة خلفية طفيفة'},{k:'الإصلاح',v:'صدام خلفي وتغيير مصبغة'},{k:'الأكياس الهوائية',v:'لم تُفعَّل'},{k:'الشد والضبط',v:'يحتاج إعادة ضبط'},{k:'تقرير التأمين',v:'مطالبة واحدة'}]},
+    health:72,hn:'أداء جيد لكن يحتاج صيانة VANOS والمضخة وكوابل الإشعال',
+  },
+  Mercedes:{
+    faults:[
+      {t:'تلف ناقل الحركة 7G-Tronic (722.9)',d:'المشكلة الأشهر في مرسيدس — تلف الكلاتش الداخلي بعد 100,000 كم خاصة إذا لم يُغيَّر زيت الناقل بانتظام كل 40,000 كم.',sev:'err'},
+      {t:'تسرب التعليق الهوائي Air Struts',d:'المواسير المطاطية للتعليق الهوائي تتشقق بعد 5-8 سنوات — يسبب انخفاض السيارة من جهة واحدة وصوت ضاغط الهواء المستمر.',sev:'err'},
+      {t:'تسرب زيت المحرك من حشية الجزيرة',d:'خاصة محركات M272 وM273 — الحشية الداخلية تتلف وتسبب تسرباً تدريجياً للزيت.',sev:'warn'},
+      {t:'عطل نظام SBC الفرامل الإلكترونية',d:'خاص بموديلات E-Class W211 (2003-2006) — الضاغط الإلكتروني يتعطل بعد 150,000 كم.',sev:'err'},
+      {t:'تلف مكثّف مكيف الهواء مبكراً',d:'في المناخات الحارة جداً — المكثّف يُصاب بالتآكل والتسرب بعد 5-7 سنوات.',sev:'warn'},
+      {t:'صدى من الحساسات الأمامية',d:'حساسات المسافة والمطر تعطي إشارات خاطئة في بعض الأحيان وتحتاج معايرة.',sev:'warn'},
+    ],
+    obd:[{c:'P0016',d:'عدم توافق الكامة مع العمود — فحص سلسلة التوقيت والزيت'},{c:'P0700',d:'خلل عام في ناقل الحركة — فحص مستوى الزيت والتحكم TCM'},{c:'C1000',d:'خطأ وحدة ABS الرئيسية — برمجة أو استبدال'},{c:'B1000',d:'خطأ وحدة الأكياس الهوائية — فحص الحساسات'}],
+    sys:{engine:'warn',transmission:'err',brakes:'warn',suspension:'err',electrical:'ok',ac:'warn'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث مسجّلة'},{k:'حالة الهيكل',v:'سليم بالكامل'},{k:'الأكياس الهوائية',v:'لم تُفعَّل'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:68,hn:'مشاكل جدية في ناقل الحركة والتعليق الهوائي تحتاج تدخلاً عاجلاً',
+  },
+  Toyota:{
+    faults:[
+      {t:'تشقق لوح عزل الحرارة تحت السيارة',d:'رنين ودوي من تحت السيارة خاصة في كورولا وكامري بعد 100,000 كم — الحل: تثبيت الألواح بمسامير جديدة.',sev:'warn'},
+      {t:'تلف مضخة الوقود في محركات 1KD ديزل',d:'مشكلة شائعة في محركات الديزل 2004-2010 — المضخة تتلف وتتسرب وقوداً في الزيت.',sev:'err'},
+      {t:'تدهور حساس الأكسجين الأمامي',d:'في محركات 1ZZ-FE — الحساس يتلف بعد 80,000 كم مؤثراً على استهلاك الوقود بشكل واضح.',sev:'warn'},
+      {t:'استهلاك زائد للزيت في محرك 2AZ-FE',d:'مشكلة معروفة في Camry 2007-2011 — حلقات المكبس تتآكل مما يتسبب في استهلاك 1 لتر زيت كل 3000 كم.',sev:'warn'},
+    ],
+    obd:[{c:'P0420',d:'كفاءة منخفضة للكتاليتيك كونفيرتر — استبدال أو تنظيف'},{c:'P0441',d:'خلل نظام EVAP — فحص غطاء خزان الوقود والصمام'},{c:'P0135',d:'تسخين بطيء لحساس الأكسجين — فحص أو استبدال'},{c:'C1391',d:'خلل ABS — فحص حساسات سرعة العجلات'}],
+    sys:{engine:'ok',transmission:'ok',brakes:'ok',suspension:'ok',electrical:'ok',ac:'warn'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'تاريخ الصيانة',v:'منتظم من الوكيل'},{k:'حالة الهيكل',v:'ممتاز'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:88,hn:'سيارة ممتازة بمعدل موثوقية عالٍ — صيانة دورية فقط مطلوبة',
+  },
+  Ford:{
+    faults:[
+      {t:'تلف ناقل PowerShift DCT المزدوج',d:'مشكلة عالمية في Focus وFiesta 2011-2016 — الكلاتش المزدوج يتلف مبكراً مسبباً اهتزازاً عند الإقلاع وتعثراً في التغيير.',sev:'err'},
+      {t:'تسرب غاز العادم من مشعب 1.6 EcoBoost',d:'تشقق مشعب العادم وتسرب الغازات الساخنة — مشكلة أمان خطيرة في EcoBoost 1.6.',sev:'err'},
+      {t:'تسرب مياه الأمطار من الزجاج الأمامي',d:'في Explorer وEdge — يصل الماء لوحة العدادات الإلكترونية ويسبب أضراراً كبيرة.',sev:'warn'},
+      {t:'تلف جسم الدمير وخرطوم الهواء',d:'في محركات 2.0L — جسم الدمير يتشقق ويسبب ضعفاً في الأداء وارتفاع استهلاك الوقود.',sev:'warn'},
+      {t:'بلى مساند الكنترول آرم الأمامية',d:'صوت طقطقة عند العبور على المطبات بعد 60,000 كم — يحتاج استبدال بوش الكنترول آرم.',sev:'warn'},
+    ],
+    obd:[{c:'P0316',d:'احتراق عند التشغيل الأول — فحص شمعات الإشعال والكوابل'},{c:'P0022',d:'توقيت الكامة متأخر بنك 2 — فحص الزيت وحساس VVT'},{c:'P0741',d:'خلل كلاتش توكيل ناقل الحركة — فحص تشغيل ناقل الحركة'},{c:'U0100',d:'فقدان التواصل مع وحدة تحكم المحرك PCM — فحص الاتصال'}],
+    sys:{engine:'warn',transmission:'err',brakes:'ok',suspension:'warn',electrical:'warn',ac:'ok'},
+    acc:{level:'minor',rows:[{k:'حوادث مسجّلة',v:'حادثة أمامية طفيفة'},{k:'الإصلاح',v:'صدام أمامي وباب أمامي أيمن'},{k:'الأكياس الهوائية',v:'لم تُفعَّل'},{k:'المصبغة',v:'باب ومصد أمامي أيمن'},{k:'تقرير التأمين',v:'مطالبة واحدة'}]},
+    health:65,hn:'مشاكل جدية في ناقل الحركة والمحرك — مطلوب فحص عاجل',
+  },
+  Hyundai:{
+    faults:[
+      {t:'تلف محرك Theta II 2.0 و2.4',d:'تلف الكرنك شافت والبيرينجات بسبب براشيم الزيت — مشمول برقعة مصنع (Recall) حتى 2027. راجع الوكيل فوراً.',sev:'err'},
+      {t:'تلف ناقل الحركة IVT/CVT',d:'تلف مبكر في CVT موديلات 2011-2015 — انزلاق وضوضاء في ناقل الحركة.',sev:'err'},
+      {t:'تراكم رواسب الكربون في حقن GDI',d:'محركات الحقن المباشر تتراكم فيها رواسب الكربون على صمامات الهواء — تنظيف دوري كل 60,000 كم.',sev:'warn'},
+      {t:'صدأ هيكل الباب من الداخل',d:'في مناطق الرطوبة والملوحة — خاصة الإطار السفلي للأبواب.',sev:'warn'},
+    ],
+    obd:[{c:'P1326',d:'كشف تلف محرك Theta II — زيارة الوكيل فوراً للضمان'},{c:'P0011',d:'توقيت الكامة مبكر جداً — فحص حساس VVT والزيت'},{c:'P0340',d:'حساس موضع الكامة — فحص أو استبدال'},{c:'C1234',d:'خطأ حساس سرعة عجلة يسرى للـ ABS'}],
+    sys:{engine:'err',transmission:'warn',brakes:'ok',suspension:'ok',electrical:'ok',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'حالة الهيكل',v:'سليم'},{k:'الأكياس الهوائية',v:'لم تُفعَّل'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:74,hn:'تحذير عاجل — تحقق من محرك Theta II لدى الوكيل للضمان المجاني',
+  },
+  Tesla:{
+    faults:[
+      {t:'تدهور بطارية مبكر في بعض الموديلات',d:'موديلات 2018-2020 بعض وحدات البطارية تفقد 10-15% من طاقتها بعد 100,000 كم.',sev:'warn'},
+      {t:'تلف شاشة MCU الرئيسية',d:'تلف ذاكرة eMMC في شاشة Model S/X — تصبح الشاشة بطيئة ثم تتوقف كلياً. مشمول بالضمان الممتد.',sev:'err'},
+      {t:'ضوضاء تعليق أمامي في Model 3',d:'بلى مساند الكنترول آرم وأذرع التعليق — ضوضاء عند السير على طرق وعرة.',sev:'warn'},
+      {t:'فجوات غير منتظمة في هيكل الجسم',d:'مشكلة معروفة في خطوط إنتاج Tesla — فجوات الأبواب والغطاء قد تكون غير متساوية.',sev:'warn'},
+      {t:'تلف طلاء الجسم ورقة السماكة',d:'طلاء المصنع رقيق مقارنة بالمنافسين — خدوش صغيرة تظهر بسهولة.',sev:'warn'},
+    ],
+    obd:[{c:'BMS_a069',d:'خلل خلية بطارية — مراقبة BMS وتحديث البرنامج'},{c:'PCS_a090',d:'خطأ شاحن الطاقة — فحص كابل الشحن والوحدة'},{c:'DI_a175',d:'إنذار محرك الدفع — تحديث OTA مطلوب'},{c:'VCFRONT_a181',d:'خطأ بوابة CAN — إعادة تشغيل الوحدة المركزية'}],
+    sys:{engine:'ok',transmission:'ok',brakes:'ok',suspension:'warn',electrical:'warn',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'بيانات Autopilot',v:'لم يُسجَّل أي تدخل طارئ'},{k:'حالة البطارية',v:'تحتاج فحص دوري'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:83,hn:'أداء جيد — راقب البطارية والشاشة وتحديثات OTA',
+  },
+  Audi:{
+    faults:[
+      {t:'تسرب زيت من ختم العمود الأمامي',d:'محركات TFSI 1.8 و2.0 — الختم الأمامي للعمود يتلف بعد 80,000 كم مسبباً تسرب الزيت.',sev:'warn'},
+      {t:'تلف وحدة ميكاترونيك S-Tronic DSG',d:'الوحدة الإلكترو-ميكانيكية لناقل DSG 7 سرعات تتلف بعد 100,000 كم — التبديل يصبح متقطعاً.',sev:'err'},
+      {t:'تراكم الكربون على صمامات المدخل',d:'في محركات الحقن المباشر FSI وTFSI — تراكم كثيف بعد 80,000 كم يقلل الأداء.',sev:'warn'},
+      {t:'تجمد وبطء شاشة MMI',d:'وحدة MMI تصبح بطيئة جداً وتتجمد في بعض الأحيان — تحديث البرنامج أو استبدال الوحدة.',sev:'warn'},
+    ],
+    obd:[{c:'P0299',d:'ضغط التيربو منخفض — فحص أنابيب الضغط والصمامات'},{c:'P189A',d:'ضغط وقود منخفض بنك 2 — فحص مضخة الوقود'},{c:'18010',d:'عطل صمام EGR — تنظيف أو استبدال'},{c:'00668',d:'خطأ ثانوي نظام ABS — فحص الحساسات'}],
+    sys:{engine:'warn',transmission:'err',brakes:'ok',suspension:'ok',electrical:'warn',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'حالة الهيكل',v:'سليم'},{k:'الأكياس الهوائية',v:'لم تُفعَّل'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:75,hn:'مشاكل في ناقل DSG — فحص وصيانة عاجلة موصى بها',
+  },
+  Volkswagen:{
+    faults:[
+      {t:'تلف ناقل DSG DQ200 جاف',d:'مشكلة عالمية في DSG 7 سرعات الجاف — الكلاتش المبلل يتلف ويسبب اهتزازاً واندفاعاً عند الإقلاع.',sev:'err'},
+      {t:'تراكم كربون كثيف في محركات TSI',d:'الحقن المباشر يتسبب في تراكم الكربون على صمامات الهواء — يحتاج تنظيف بالكربون كل 60,000 كم.',sev:'warn'},
+      {t:'تلف مضخة الماء البلاستيكية',d:'في محركات EA888 2.0T — المضخة البلاستيكية تتشقق وتسبب ارتفاع الحرارة المفاجئ.',sev:'err'},
+      {t:'عطل صمام N75 التيربو',d:'صمام تحكم ضغط التيربو يتلف ويسبب ضعف الأداء ورسالة خطأ P0299.',sev:'warn'},
+    ],
+    obd:[{c:'P0299',d:'ضغط التيربو منخفض — فحص صمام N75 وأنابيب الضغط'},{c:'17964',d:'تدفق هواء MAF غير طبيعي — تنظيف أو استبدال MAF'},{c:'P0563',d:'جهد بطارية مرتفع — فحص الدينامو والبطارية'},{c:'18268',d:'خطأ صمام EGR — تنظيف أو استبدال'}],
+    sys:{engine:'warn',transmission:'err',brakes:'ok',suspension:'ok',electrical:'warn',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'حالة الهيكل',v:'سليم'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:71,hn:'مشاكل في ناقل DSG ومضخة الماء — تدخل عاجل مطلوب',
+  },
+  Kia:{
+    faults:[
+      {t:'تلف محرك Theta II مشترك مع Hyundai',d:'مشمول برقعة مصنع رسمية (Recall) — تلف الكرنك والبيرينجات. يجب مراجعة الوكيل فوراً.',sev:'err'},
+      {t:'تلف الكلاتش المزدوج DCT',d:'في Ceed وSportage وCerato — الكلاتش يتلف مبكراً مسبباً ارتجاجاً عند التغيير.',sev:'warn'},
+      {t:'تسرب زيت المحرك من غطاء الصمامات',d:'في محركات G4NA وG4KE — حشية الغطاء تتشقق وتسرب الزيت.',sev:'warn'},
+    ],
+    obd:[{c:'P1326',d:'كشف تلف محرك Theta II — زيارة عاجلة للوكيل'},{c:'P0014',d:'توقيت الكامة الخلفية متقدم جداً — فحص VVT'},{c:'P0715',d:'خلل حساس سرعة ناقل الحركة'}],
+    sys:{engine:'err',transmission:'warn',brakes:'ok',suspension:'ok',electrical:'ok',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'حالة الهيكل',v:'سليم'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:73,hn:'تحذير Theta II عاجل — راجع الوكيل للضمان المجاني',
+  },
+  Honda:{
+    faults:[
+      {t:'تخفيف زيت المحرك بالبنزين في 1.5T',d:'مشكلة موثقة في Civic وCR-V بمحرك 1.5T — الوقود يختلط بالزيت خاصة في المناخات الباردة.',sev:'err'},
+      {t:'تلف ناقل CVT في Accord وCivic',d:'في موديلات 2013-2017 — اهتزاز وصوت غريب وتلف مبكر لوحدة CVT.',sev:'warn'},
+      {t:'سحب إيربيك تاكاتا المعيوبة',d:'تم إصدار سحب عالمي (Recall) لأكياس هوائية تاكاتا — تحقق من تنفيذ الاستبدال.',sev:'err'},
+      {t:'تآكل بوش البلي الأمامي',d:'في Accord وCivic بعد 60,000 كم — ضوضاء عند الانعطاف.',sev:'warn'},
+    ],
+    obd:[{c:'P0401',d:'تدفق EGR غير كافٍ — تنظيف الصمام'},{c:'P0128',d:'حرارة المحرك أقل من الطبيعي — فحص الترموستات'},{c:'B0028',d:'خطأ حساس كيس هوائي جانبي'},{c:'P0740',d:'خلل كلاتش التوكيل CVT'}],
+    sys:{engine:'warn',transmission:'warn',brakes:'ok',suspension:'ok',electrical:'ok',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'الأكياس الهوائية',v:'تاكاتا — تحقق من الاستبدال'},{k:'حالة الهيكل',v:'سليم'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:80,hn:'مقبول — راقب زيت محرك 1.5T وتحقق من الكيس الهوائي تاكاتا',
+  },
+  Nissan:{
+    faults:[
+      {t:'تلف ناقل CVT جيل ثانٍ',d:'أشهر مشكلة في Altima وSentra وRogue 2013-2018 — الناقل يتلف مبكراً جداً مع أصوات ومشاكل انزلاق.',sev:'err'},
+      {t:'تشقق لوحة قيادة داخلية',d:'في مناخات حارة جداً — Altima وMaxima موديلات 2013-2018 تشقق ملحوظ في اللوحة العلوية.',sev:'warn'},
+      {t:'تلف شاشة NissanConnect',d:'الشاشة تتجمد وتتوقف — خاصة في موديلات 2015-2019.',sev:'warn'},
+      {t:'خلل نظام شحن البطارية',d:'الدينامو يتعطل مبكراً في محركات VQ35DE — بعد 100,000 كم.',sev:'warn'},
+    ],
+    obd:[{c:'P0717',d:'حساس سرعة ناقل CVT تالف — استبدال حساس أو CVT'},{c:'P0868',d:'ضغط زيت CVT منخفض — فحص مستوى الزيت'},{c:'B2477',d:'خطأ وحدة هيكل المفتاح الذكي'},{c:'P0340',d:'حساس موضع الكامة — فحص أو استبدال'}],
+    sys:{engine:'ok',transmission:'err',brakes:'ok',suspension:'warn',electrical:'warn',ac:'ok'},
+    acc:{level:'minor',rows:[{k:'حوادث مسجّلة',v:'حادثة خلفية طفيفة'},{k:'الإصلاح',v:'صدام خلفي'},{k:'الأكياس الهوائية',v:'لم تُفعَّل'},{k:'تقرير التأمين',v:'مطالبة واحدة صغيرة'}]},
+    health:70,hn:'تحذير عاجل من CVT — مراجعة الوكيل واحتياطي ضروري',
+  },
+  Chevrolet:{
+    faults:[
+      {t:'خلل ناقل 6T70/6T75 السداسي',d:'تلف المحور الداخلي ومسامير تثبيت الدافشة — يسبب اهتزازاً ملحوظاً.',sev:'warn'},
+      {t:'تسرب راديتير من الخرطوم الداخلي',d:'خاصة محركات 3.6L V6 — الخرطوم الداخلي للراديتير يتشقق ويسبب ارتفاع الحرارة.',sev:'warn'},
+      {t:'تلف مستشعر موضع عمود الإدخال',d:'يسبب مشاكل في التوقيت والتشغيل — ضروري استبداله عند ظهور رسالة Check Engine.',sev:'warn'},
+    ],
+    obd:[{c:'P0013',d:'صمام تحكم زيت الكامة الخلفية — فحص VVT'},{c:'P0700',d:'خلل ناقل الحركة — فحص TCM والزيت'},{c:'P0446',d:'خلل صمام تهوية EVAP — فحص غطاء الخزان'}],
+    sys:{engine:'warn',transmission:'warn',brakes:'ok',suspension:'ok',electrical:'warn',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'حالة الهيكل',v:'سليم'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:76,hn:'أداء معقول — راقب ناقل الحركة والراديتير',
+  },
+  BYD:{
+    faults:[
+      {t:'بطء تحديث نظام DiLink الترفيهي',d:'بعض وحدات المعالجة تحتاج تحديث OTA دوري لتحسين الأداء والاستقرار.',sev:'warn'},
+      {t:'انخفاض أداء البطارية LFP في البرودة',d:'بطاريات LFP تفقد 20-25% من طاقتها في درجات أقل من 5 درجات مئوية.',sev:'warn'},
+      {t:'تلف مؤقت في شاشة اللمس',d:'بعض وحدات شاشة Han وTang تتوقف مؤقتاً — تحديث البرنامج يحل المشكلة.',sev:'warn'},
+    ],
+    obd:[{c:'BMS-001',d:'خلية بطارية ضعيفة — فحص BMS وتحديث البرنامج'},{c:'MCU-012',d:'خطأ وحدة تحكم الموتور — تحديث فيرموير'},{c:'CHG-004',d:'خطأ نظام الشحن — فحص كابل AC وبوابة الشحن'}],
+    sys:{engine:'ok',transmission:'ok',brakes:'ok',suspension:'ok',electrical:'warn',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'حالة الهيكل',v:'سليم'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:84,hn:'أداء جيد عموماً — راقب تحديثات البرنامج وحالة البطارية',
+  },
+  Lexus:{
+    faults:[
+      {t:'تسرب زيت من ختم العمود الخلفي',d:'في محركات 5GR-FE و2GR-FE — الختم الخلفي يتلف بعد 120,000 كم.',sev:'warn'},
+      {t:'بطء نظام الملاحة Gen 8',d:'نظام Enmark/Enform الجيل الثامن بطيء — يحتاج تحديث أو استبدال.',sev:'warn'},
+      {t:'تلف عاكس بوابة ضبط الهواء',d:'في محرك 2GR-FE — يسبب كود P0125 وقد يؤثر على استهلاك الوقود.',sev:'warn'},
+    ],
+    obd:[{c:'P0125',d:'ترموستات — درجة حرارة المحرك أقل من الطبيعي'},{c:'C1201',d:'خطأ نظام المحرك مرتبط بـ ABS'},{c:'B2799',d:'تلاؤم مفتاح التشغيل الذكي — إعادة برمجة'}],
+    sys:{engine:'ok',transmission:'ok',brakes:'ok',suspension:'ok',electrical:'ok',ac:'ok'},
+    acc:{level:'no',rows:[{k:'سجل الحوادث',v:'لا توجد حوادث'},{k:'حالة الهيكل',v:'ممتاز'},{k:'تقرير التأمين',v:'نظيف'}]},
+    health:92,hn:'سيارة ممتازة — موثوقية عالية جداً',
+  },
+};
+
+const SYS={engine:{ar:'المحرك',i:'⚙️'},transmission:{ar:'ناقل الحركة',i:'🔄'},brakes:{ar:'الفرامل',i:'🛑'},suspension:{ar:'التعليق',i:'🔩'},electrical:{ar:'الكهرباء',i:'⚡'},ac:{ar:'المكيف',i:'❄️'}};
+const SSTATUS={ok:{l:'ممتاز',c:'ok'},warn:{l:'يحتاج مراقبة',c:'warn'},err:{l:'تحتاج صيانة',c:'err'}};
+
+// VIN hint
+document.getElementById('vin').addEventListener('input',function(){
+  const v=this.value.trim();const h=document.getElementById('vinHint');
+  if(!v){h.textContent='';return;}
+  if(v.length<17){h.textContent=`${v.length}/17 خانة`;h.style.color='#ffaa00';return;}
+  const d=decodeVIN(v);
+  if(d&&d.mfr!=='غير معروف'){h.textContent=`✅ ${d.mfr} — ${d.ctry} — سنة ${d.yr}`;h.style.color='#00ff95';}
+  else{h.textContent='⚠️ VIN غير معروف — سيُكمَل التحليل حسب الشركة';h.style.color='#ffaa00';}
+});
+
+function getMileageFaults(km){
+  const w=[];
+  if(km>200000)w.push({t:'العداد تجاوز 200,000 كم',d:'ضروري جداً: فحص شامل للمحرك وناقل الحركة والتعليق والفرامل.',sev:'err'});
+  else if(km>120000)w.push({t:'صيانة شاملة مقترحة بإلحاح',d:'السيارة تجاوزت 120,000 كم — مراجعة سلسلة التوقيت والأختام والخراطيم.',sev:'warn'});
+  else if(km>80000)w.push({t:'حزمة صيانة متوسطة مقترحة',d:'تغيير التايمنج والخراطيم المطاطية وفلاتر الهواء والزيت.',sev:'warn'});
+  if(km>100000)w.push({t:'فحص أختام المحرك المطاطية',d:'الأختام بعد هذه المسافة تبدأ بالتصلب والتسرب التدريجي.',sev:'warn'});
+  return w;
+}
+
+function runScan(){
+  const brand=document.getElementById('brand').value;
+  const model=document.getElementById('model').value.trim();
+  const vin=document.getElementById('vin').value.trim().toUpperCase();
+  const year=document.getElementById('year').value.trim();
+  const engine=document.getElementById('engine').value;
+  const mileage=parseInt(document.getElementById('mileage').value)||0;
+  const panel=document.getElementById('resultPanel');
+  const btn=document.getElementById('scanBtn');
+  if(!model&&!vin){showToast('⚠️ أدخل الموديل أو رقم VIN للمتابعة');return;}
+
+  btn.disabled=true;btn.innerHTML='<span>⏳</span><span>جارٍ التحليل...</span>';
+  const steps=['🔐 فك تشفير رقم VIN...','🔍 البحث في قاعدة الأعطال...','💥 تحليل تاريخ الحوادث...','⚙️ تقييم أنظمة السيارة...','📋 إنشاء التقرير...'];
+  let si=0;
+  panel.innerHTML=`<div class="scan-loading"><div class="pulse-ring"></div><p>يتم التحليل — يرجى الانتظار</p><div class="scan-steps" id="stepsList">${steps.map((s,i)=>`<div class="step-item" id="st${i}">${s}</div>`).join('')}</div></div>`;
+  const t=setInterval(()=>{
+    if(si>0)document.getElementById(`st${si-1}`)?.classList.replace('active','done');
+    if(si<steps.length)document.getElementById(`st${si}`)?.classList.add('active');
+    si++;if(si>steps.length)clearInterval(t);
+  },420);
+  setTimeout(()=>{clearInterval(t);genReport(brand,model,vin,year,engine,mileage,panel);btn.disabled=false;btn.innerHTML='<span>🔍</span><span>تشغيل الفحص الشامل</span>';},2300);
+}
+
+function genReport(brand,model,vin,year,engine,mileage,panel){
+  const data=DB[brand]||DB.Toyota;
+  const vd=vin?decodeVIN(vin):null;
+  const mFaults=getMileageFaults(mileage);
+  const allFaults=[...data.faults,...mFaults];
+  let health=data.health;
+  if(mileage>150000)health=Math.max(health-12,40);
+  else if(mileage>100000)health=Math.max(health-6,50);
+  const hc=health>=80?'#00ff95':health>=65?'#ffaa00':'#ff4444';
+  const engLabel={petrol:'بنزين',diesel:'ديزل',hybrid:'هجين',electric:'كهربائي'}[engine]||'بنزين';
+  const accLabel={no:'✅ لا توجد حوادث مسجّلة',minor:'⚠️ حادثة طفيفة مسجّلة',major:'🔴 حادثة كبيرة مسجّلة'}[data.acc.level];
+  const accCls=data.acc.level;
+
+  panel.innerHTML=`
+  <div class="report-card">
+    <div class="report-header">
+      <h3>📋 تقرير الفحص — ${brand} ${model} ${year?`(${year})`:''}</h3>
+      <p>${engLabel}${mileage?' · العداد: '+mileage.toLocaleString()+' كم':''} · تم الفحص بقاعدة البيانات المتكاملة</p>
+    </div>
+    <div class="report-body">
+
+      ${vd?`<div class="report-section">
+        <h4>🔑 تحليل رقم الهيكل VIN</h4>
+        <div class="accident-box" style="margin:0">
+          <div class="acc-row"><span>رمز المصنّع WMI</span><span>${vd.wmi}</span></div>
+          <div class="acc-row"><span>الشركة المصنّعة</span><span>${vd.mfr}</span></div>
+          <div class="acc-row"><span>بلد التصنيع</span><span>${vd.ctry}</span></div>
+          <div class="acc-row"><span>سنة الموديل من VIN</span><span>${vd.yr}</span></div>
+          <div class="acc-row"><span>الرقم التسلسلي</span><span>${vd.seq||'—'}</span></div>
+          <div class="acc-row"><span>صحة رقم VIN</span><span style="color:${vd.valid?'#00ff95':'#ffaa00'}">${vd.valid?'✅ صحيح':'⚠️ راجع الرقم'}</span></div>
+        </div>
+      </div>`:''}
+
+      <div class="report-section">
+        <h4>📊 الصحة العامة للسيارة</h4>
+        <div class="health-wrap">
+          <div class="health-circle" style="--p:${health};--c:${hc}">
+            <span>${health}%</span><small>صحة</small>
+          </div>
+          <div class="health-info">
+            <strong style="color:${hc}">${health>=80?'ممتازة':health>=65?'جيدة مع تحفظات':'تحتاج صيانة عاجلة'}</strong>
+            <p>${data.hn}${mileage>100000?' — العداد المرتفع يؤثر على التقييم.':''}</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h4>💥 تاريخ الحوادث</h4>
+        <div class="accident-box">
+          <div class="acc-header">
+            <span class="acc-badge ${accCls}">${accLabel}</span>
+            <span style="font-size:12px;color:#556;">مصدر: سجلات التأمين والمراكز المعتمدة</span>
+          </div>
+          ${data.acc.rows.map(r=>`<div class="acc-row"><span>${r.k}</span><span>${r.v}</span></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h4>⚙️ حالة الأنظمة الرئيسية</h4>
+        <div class="systems-grid">
+          ${Object.entries(data.sys).map(([k,st])=>{const s=SYS[k];const ss=SSTATUS[st];return`<div class="sys-item"><div class="sys-dot ${ss.c}"></div><div class="sys-info"><strong>${s.i} ${s.ar}</strong><span class="sys-status ${ss.c}">${ss.l}</span></div></div>`;}).join('')}
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h4>⚠️ الأعطال الشائعة والمعروفة</h4>
+        <div class="fault-list">
+          ${allFaults.map(f=>`<div class="fault-item ${f.sev==='err'?'critical':f.sev==='ok'?'good':''}"><div class="fault-title">${f.sev==='err'?'🔴':'⚠️'} ${f.t}</div><div>${f.d}</div></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h4>🖥️ أكواد الأعطال الإلكترونية OBD</h4>
+        <div class="obd-list">
+          ${data.obd.map(o=>`<div class="obd-item"><div class="obd-code">${o.c}</div><div class="obd-desc">${o.d}</div></div>`).join('')}
+        </div>
+      </div>
+
+      <div class="report-section">
+        <h4>💡 توصيات الصيانة</h4>
+        <ul>
+          <li>تغيير زيت المحرك كل 5,000 كم باستخدام الزيت الموصى به من المصنّع.</li>
+          <li>فحص ضغط الإطارات شهرياً ومقارنتها بلوحة الباب.</li>
+          ${mileage>80000?'<li>فحص وربما استبدال حزام التايمنج أو سلسلته إن لم يُبدَّل.</li>':''}
+          ${mileage>60000?'<li>تغيير سائل الفرامل إذا تجاوز عمره 3 سنوات.</li>':''}
+          <li>فحص سائل ناقل الحركة كل 40,000 كم.</li>
+          <li>فحص البطارية ومستوى الشحن خاصة إذا تجاوز عمرها 3 سنوات.</li>
+          <li>فحص الفلتر الهواء وفلتر الكابين كل موسم.</li>
+          ${allFaults[0]?`<li>⚠️ تنبيه خاص: اعطِ الأولوية لمعالجة "${allFaults[0].t}".</li>`:''}
+        </ul>
+      </div>
+
+    </div>
+  </div>`;
+  document.getElementById('resultPanel').scrollIntoView({behavior:'smooth',block:'nearest'});
+  showToast('✅ تم إنشاء تقرير الفحص الكامل');
+}
+
+function sendRequest(){
+  const name=document.getElementById('rName').value.trim();
+  const car=document.getElementById('rCar').value.trim();
+  const loc=document.getElementById('rLoc').value.trim();
+  const prob=document.getElementById('rProblem').value.trim();
+  const el=document.getElementById('reqResult');
+  if(!name||!car){showToast('⚠️ الاسم ونوع السيارة مطلوبان');return;}
+  el.style.display='block';
+  el.innerHTML=`✅ تم إرسال طلب الصيانة بنجاح<br><br>👤 العميل: <b>${name}</b><br>🚘 السيارة: <b>${car}</b><br>📍 الموقع: <b>${loc||'—'}</b><br>📝 المشكلة: <b>${prob||'—'}</b><br><br>سيتم التواصل معك من أقرب مركز صيانة معتمد.`;
+}
+
+function showToast(msg){
+  const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'),3000);
+}
+</script>
+</body>
+</html>
