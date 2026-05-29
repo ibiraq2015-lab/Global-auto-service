@@ -1,0 +1,438 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>حروب العراق 1980 – 2006</title>
+<link rel="stylesheet" href="css/style.css">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Naskh+Arabic:wght@400;600;700;900&family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+</head>
+<body>
+
+<!-- ===== LOADING SCREEN ===== -->
+<div id="loading-screen">
+  <div class="load-logo">
+    <div class="eagle-icon">🦅</div>
+    <h1>حروب العراق</h1>
+    <p>1980 – 2006</p>
+  </div>
+  <div class="load-bar-wrap">
+    <div class="load-bar"><div class="load-fill" id="load-fill"></div></div>
+    <span id="load-text">جاري التحميل...</span>
+  </div>
+</div>
+
+<!-- ===== MAIN MENU ===== -->
+<div id="main-menu" class="screen hidden">
+  <canvas id="bg-canvas"></canvas>
+  <div class="menu-overlay"></div>
+
+  <div class="menu-content">
+    <div class="menu-header">
+      <div class="iraq-flag-wrap">
+        <div class="iraq-flag"><div class="flag-red"></div><div class="flag-white"><span class="flag-text">الله أكبر</span></div><div class="flag-black"></div></div>
+      </div>
+      <div class="title-block">
+        <div class="title-eagle">🦅</div>
+        <h1 class="game-title">حروب العراق</h1>
+        <div class="title-years">1980 – 2006</div>
+        <p class="title-sub">تاريخ من التضحية والفداء</p>
+      </div>
+    </div>
+
+    <nav class="main-nav">
+      <button class="nav-btn primary" onclick="showScreen('campaign-screen')">
+        <span class="btn-icon">⚔️</span><span>الحملة</span>
+      </button>
+      <button class="nav-btn" onclick="showScreen('char-screen')">
+        <span class="btn-icon">🎮</span><span>لعب سريع</span>
+      </button>
+      <button class="nav-btn" onclick="showScreen('multiplayer-screen')">
+        <span class="btn-icon">👥</span><span>الطور الجماعي</span>
+      </button>
+      <button class="nav-btn" onclick="showScreen('missions-screen')">
+        <span class="btn-icon">🎯</span><span>المهمات الخاصة</span>
+      </button>
+      <button class="nav-btn" onclick="showScreen('store-screen')">
+        <span class="btn-icon">🛒</span><span>المتجر</span>
+      </button>
+      <button class="nav-btn" onclick="showScreen('settings-screen')">
+        <span class="btn-icon">⚙️</span><span>الإعدادات</span>
+      </button>
+    </nav>
+
+    <div class="news-ticker">
+      <span class="ticker-label">أخبار اللعبة:</span>
+      <div class="ticker-wrap">
+        <div class="ticker-inner" id="news-ticker">
+          <span>مرحباً بك في حروب العراق 1980-2006 ★ اختر مرحلتك وابدأ المعركة ★ الجيش العراقي ينتظرك ★ دافع عن الوطن بكل ما لديك ★</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CAMPAIGN SCREEN ===== -->
+<div id="campaign-screen" class="screen hidden">
+  <div class="screen-bg campaign-bg"></div>
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main-menu')">← رجوع</button>
+    <h2>الحملة التاريخية</h2>
+    <div class="header-icon">⚔️</div>
+  </div>
+  <div class="campaign-list">
+
+    <div class="campaign-era unlocked" onclick="selectEra('iran',this)">
+      <div class="era-year">1980 – 1988</div>
+      <div class="era-flag">🇮🇷</div>
+      <div class="era-info">
+        <h3>الحرب العراقية – الإيرانية</h3>
+        <p>دفاع عن الوطن · 8 سنوات من الصمود</p>
+        <div class="era-maps">
+          <span>الحدود الشرقية</span><span>البصرة</span><span>الفاو</span>
+        </div>
+      </div>
+      <div class="era-status">متاح</div>
+    </div>
+
+    <div class="campaign-era unlocked" onclick="selectEra('gulf',this)">
+      <div class="era-year">1990 – 1991</div>
+      <div class="era-flag">🇰🇼</div>
+      <div class="era-info">
+        <h3>حرب الخليج الأولى</h3>
+        <p>تحرير الكويت · عاصفة الصحراء</p>
+        <div class="era-maps">
+          <span>الكويت</span><span>الصحراء</span><span>الطرق العسكرية</span>
+        </div>
+      </div>
+      <div class="era-status">متاح</div>
+    </div>
+
+    <div class="campaign-era unlocked" onclick="selectEra('postwar','this')">
+      <div class="era-year">1991 – 1996</div>
+      <div class="era-flag">🇺🇳</div>
+      <div class="era-info">
+        <h3>العمليات بعد الحرب</h3>
+        <p>حظر جوي · بناء وإعادة إعمار</p>
+        <div class="era-maps">
+          <span>بغداد</span><span>البصرة</span><span>الشمال</span>
+        </div>
+      </div>
+      <div class="era-status">متاح</div>
+    </div>
+
+    <div class="campaign-era unlocked" onclick="selectEra('invasion',this)">
+      <div class="era-year">2003 – 2006</div>
+      <div class="era-flag">🇺🇸</div>
+      <div class="era-info">
+        <h3>مقاومة الاحتلال</h3>
+        <p>التصدي للعدوان · مقاومة وصمود</p>
+        <div class="era-maps">
+          <span>بغداد</span><span>الفلوجة</span><span>الموصل</span><span>الرمادي</span><span>تكريت</span><span>النجف</span>
+        </div>
+      </div>
+      <div class="era-status">متاح</div>
+    </div>
+
+  </div>
+  <div class="campaign-actions hidden" id="campaign-actions">
+    <button class="action-btn" onclick="showScreen('char-screen')">اختيار الشخصية والبدء</button>
+  </div>
+</div>
+
+<!-- ===== CHARACTER SELECT ===== -->
+<div id="char-screen" class="screen hidden">
+  <div class="screen-bg char-bg"></div>
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('campaign-screen')">← رجوع</button>
+    <h2>اختيار الشخصية</h2>
+    <div class="header-icon">🎖️</div>
+  </div>
+
+  <div class="char-layout">
+    <div class="char-side-title">الجيش العراقي</div>
+    <div class="chars-grid" id="chars-grid">
+
+      <div class="char-card selected" onclick="selectChar(this,'infantry')" data-char="infantry">
+        <div class="char-model infantry-model">
+          <div class="char-3d">👮</div>
+          <div class="char-glow"></div>
+        </div>
+        <h4>ضابط مشاة</h4>
+        <div class="char-stats">
+          <div class="stat-row"><span>HP</span><div class="stat-bar"><div class="stat-fill" style="width:80%"></div></div></div>
+          <div class="stat-row"><span>سرعة</span><div class="stat-bar"><div class="stat-fill" style="width:75%"></div></div></div>
+          <div class="stat-row"><span>دقة</span><div class="stat-bar"><div class="stat-fill" style="width:70%"></div></div></div>
+        </div>
+        <div class="char-weapon">🔫 AK-47</div>
+        <div class="char-skill">⚡ حماسة القتال</div>
+      </div>
+
+      <div class="char-card" onclick="selectChar(this,'guard')" data-char="guard">
+        <div class="char-model guard-model">
+          <div class="char-3d">🪖</div>
+          <div class="char-glow"></div>
+        </div>
+        <h4>حرس جمهوري</h4>
+        <div class="char-stats">
+          <div class="stat-row"><span>HP</span><div class="stat-bar"><div class="stat-fill" style="width:95%"></div></div></div>
+          <div class="stat-row"><span>سرعة</span><div class="stat-bar"><div class="stat-fill" style="width:60%"></div></div></div>
+          <div class="stat-row"><span>دقة</span><div class="stat-bar"><div class="stat-fill" style="width:85%"></div></div></div>
+        </div>
+        <div class="char-weapon">🔫 SVD Dragunov</div>
+        <div class="char-skill">🛡️ درع الجمهورية</div>
+      </div>
+
+      <div class="char-card" onclick="selectChar(this,'tank')" data-char="tank">
+        <div class="char-model tank-model">
+          <div class="char-3d">🎖️</div>
+          <div class="char-glow"></div>
+        </div>
+        <h4>قائد دبابة</h4>
+        <div class="char-stats">
+          <div class="stat-row"><span>HP</span><div class="stat-bar"><div class="stat-fill" style="width:70%"></div></div></div>
+          <div class="stat-row"><span>سرعة</span><div class="stat-bar"><div class="stat-fill" style="width:50%"></div></div></div>
+          <div class="stat-row"><span>دقة</span><div class="stat-bar"><div class="stat-fill" style="width:90%"></div></div></div>
+        </div>
+        <div class="char-weapon">💣 T-72 + مسدس</div>
+        <div class="char-skill">🚀 نيران المدفعية</div>
+      </div>
+
+      <div class="char-card" onclick="selectChar(this,'pilot')" data-char="pilot">
+        <div class="char-model pilot-model">
+          <div class="char-3d">✈️</div>
+          <div class="char-glow"></div>
+        </div>
+        <h4>طيار</h4>
+        <div class="char-stats">
+          <div class="stat-row"><span>HP</span><div class="stat-bar"><div class="stat-fill" style="width:65%"></div></div></div>
+          <div class="stat-row"><span>سرعة</span><div class="stat-bar"><div class="stat-fill" style="width:100%"></div></div></div>
+          <div class="stat-row"><span>دقة</span><div class="stat-bar"><div class="stat-fill" style="width:95%"></div></div></div>
+        </div>
+        <div class="char-weapon">🔫 مسدس + قنابل</div>
+        <div class="char-skill">🦅 ضربة جوية</div>
+      </div>
+
+    </div>
+
+    <div class="map-select">
+      <h3>اختيار الخريطة</h3>
+      <div class="maps-grid">
+        <div class="map-card selected" onclick="selectMap(this,'basra')">
+          <div class="map-preview basra-preview">🏜️</div>
+          <span>البصرة</span>
+        </div>
+        <div class="map-card" onclick="selectMap(this,'baghdad')">
+          <div class="map-preview baghdad-preview">🏙️</div>
+          <span>بغداد</span>
+        </div>
+        <div class="map-card" onclick="selectMap(this,'kuwait')">
+          <div class="map-preview kuwait-preview">🌵</div>
+          <span>الكويت</span>
+        </div>
+        <div class="map-card" onclick="selectMap(this,'fallujah')">
+          <div class="map-preview fallujah-preview">🏚️</div>
+          <span>الفلوجة</span>
+        </div>
+        <div class="map-card" onclick="selectMap(this,'mosul')">
+          <div class="map-preview mosul-preview">🌉</div>
+          <span>الموصل</span>
+        </div>
+        <div class="map-card" onclick="selectMap(this,'tikrit')">
+          <div class="map-preview tikrit-preview">🏛️</div>
+          <span>تكريت</span>
+        </div>
+      </div>
+
+      <div class="difficulty-select">
+        <h3>مستوى الصعوبة</h3>
+        <div class="diff-btns">
+          <button class="diff-btn easy" onclick="setDiff('easy',this)">سهل</button>
+          <button class="diff-btn normal selected" onclick="setDiff('normal',this)">عادي</button>
+          <button class="diff-btn hard" onclick="setDiff('hard',this)">صعب</button>
+          <button class="diff-btn impossible" onclick="setDiff('impossible',this)">مستحيل</button>
+        </div>
+      </div>
+
+      <button class="start-game-btn" onclick="startGame()">
+        <span>🎮</span> ابدأ اللعبة
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ===== MULTIPLAYER (placeholder) ===== -->
+<div id="multiplayer-screen" class="screen hidden">
+  <div class="screen-bg char-bg"></div>
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main-menu')">← رجوع</button>
+    <h2>الطور الجماعي</h2>
+  </div>
+  <div class="placeholder-content">
+    <div class="placeholder-icon">👥</div>
+    <h3>قريباً</h3>
+    <p>الطور الجماعي قيد التطوير</p>
+  </div>
+</div>
+
+<!-- ===== MISSIONS ===== -->
+<div id="missions-screen" class="screen hidden">
+  <div class="screen-bg char-bg"></div>
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main-menu')">← رجوع</button>
+    <h2>المهمات الخاصة</h2>
+  </div>
+  <div class="missions-list">
+    <div class="mission-item" onclick="startMission('rescue')">
+      <div class="mission-icon">🚑</div>
+      <div class="mission-info"><h4>إنقاذ الرهائن</h4><p>حرر الجنود المحاصرين في الفلوجة</p></div>
+      <div class="mission-diff hard-diff">صعب</div>
+    </div>
+    <div class="mission-item" onclick="startMission('convoy')">
+      <div class="mission-icon">🚛</div>
+      <div class="mission-info"><h4>حماية القافلة</h4><p>أوصل الإمدادات بأمان عبر الصحراء</p></div>
+      <div class="mission-diff normal-diff">عادي</div>
+    </div>
+    <div class="mission-item" onclick="startMission('tank_assault')">
+      <div class="mission-icon">🛡️</div>
+      <div class="mission-info"><h4>الهجوم المدرع</h4><p>قد دبابتك في معركة كبرى</p></div>
+      <div class="mission-diff hard-diff">صعب</div>
+    </div>
+    <div class="mission-item" onclick="startMission('air_support')">
+      <div class="mission-icon">✈️</div>
+      <div class="mission-info"><h4>الدعم الجوي</h4><p>وفر غطاءً جوياً للقوات البرية</p></div>
+      <div class="mission-diff impossible-diff">مستحيل</div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STORE ===== -->
+<div id="store-screen" class="screen hidden">
+  <div class="screen-bg char-bg"></div>
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main-menu')">← رجوع</button>
+    <h2>المتجر</h2>
+    <div class="store-currency"><span>💰 12500</span><span>💎 850</span></div>
+  </div>
+  <div class="store-grid">
+    <div class="store-item"><div class="item-icon">🔫</div><h4>AK-74 محسّن</h4><p>دقة +20%</p><button>💰 2000</button></div>
+    <div class="store-item"><div class="item-icon">💣</div><h4>قنابل يدوية x5</h4><p>ضرر انفجار</p><button>💰 500</button></div>
+    <div class="store-item"><div class="item-icon">🛡️</div><h4>درع إضافي</h4><p>HP +30</p><button>💰 1500</button></div>
+    <div class="store-item"><div class="item-icon">🚀</div><h4>RPG-7</h4><p>لتدمير المركبات</p><button>💎 200</button></div>
+    <div class="store-item"><div class="item-icon">❤️</div><h4>حقيبة طبية</h4><p>إعادة صحة 50%</p><button>💰 800</button></div>
+    <div class="store-item"><div class="item-icon">🗺️</div><h4>خريطة تكتيكية</h4><p>minimap محسّن</p><button>💎 50</button></div>
+  </div>
+</div>
+
+<!-- ===== SETTINGS ===== -->
+<div id="settings-screen" class="screen hidden">
+  <div class="screen-bg char-bg"></div>
+  <div class="screen-header">
+    <button class="back-btn" onclick="showScreen('main-menu')">← رجوع</button>
+    <h2>الإعدادات</h2>
+  </div>
+  <div class="settings-list">
+    <div class="setting-row"><label>الموسيقى</label><input type="range" id="music-vol" min="0" max="100" value="70" oninput="setSetting('music',this.value)"><span id="music-val">70</span></div>
+    <div class="setting-row"><label>المؤثرات الصوتية</label><input type="range" id="sfx-vol" min="0" max="100" value="80" oninput="setSetting('sfx',this.value)"><span id="sfx-val">80</span></div>
+    <div class="setting-row"><label>اهتزاز الكاميرا</label><input type="checkbox" id="cam-shake" checked><label for="cam-shake" class="toggle-lbl"></label></div>
+    <div class="setting-row"><label>الجودة الرسومية</label>
+      <select onchange="setSetting('quality',this.value)">
+        <option value="low">منخفض</option><option value="medium" selected>متوسط</option><option value="high">عالي</option>
+      </select>
+    </div>
+    <div class="setting-row"><label>اللغة</label><select><option value="ar" selected>العربية</option><option value="en">English</option></select></div>
+    <div class="setting-row"><label>حساسية الكاميرا</label><input type="range" min="1" max="10" value="5"><span>5</span></div>
+  </div>
+</div>
+
+<!-- ===== GAME SCREEN ===== -->
+<div id="game-screen" class="screen hidden">
+  <canvas id="game-canvas"></canvas>
+
+  <!-- HUD -->
+  <div id="hud">
+    <div class="hud-top">
+      <div class="hud-health">
+        <div class="health-icon">❤️</div>
+        <div class="health-bar-wrap"><div class="health-bar" id="health-bar"></div></div>
+        <span id="health-val">100</span>
+      </div>
+      <div class="hud-center">
+        <div class="hud-objective" id="hud-objective">الهدف: تحييد الأعداء</div>
+        <div class="hud-timer" id="hud-timer">08:45</div>
+      </div>
+      <div class="hud-ammo">
+        <span id="hud-ammo">31 / 120</span>
+        <div class="ammo-icon">🔫</div>
+      </div>
+    </div>
+
+    <div class="hud-minimap" id="minimap">
+      <canvas id="minimap-canvas" width="150" height="150"></canvas>
+      <div class="minimap-label">خريطة</div>
+    </div>
+
+    <div class="hud-score">
+      <span>نقاط: </span><span id="score-val">0</span>
+    </div>
+
+    <div class="hud-weapon-list" id="weapon-list">
+      <div class="weapon-slot active" id="slot-1">🔫</div>
+      <div class="weapon-slot" id="slot-2">💣</div>
+      <div class="weapon-slot" id="slot-3">🗡️</div>
+    </div>
+
+    <div class="kill-feed" id="kill-feed"></div>
+  </div>
+
+  <!-- MOBILE CONTROLS -->
+  <div id="mobile-controls">
+    <div class="joystick-area" id="joystick-area">
+      <div class="joystick-base">
+        <div class="joystick-thumb" id="joystick-thumb"></div>
+      </div>
+    </div>
+
+    <div class="action-btns">
+      <button class="act-btn fire-btn" id="fire-btn" ontouchstart="startFire()" ontouchend="stopFire()">🔴</button>
+      <button class="act-btn aim-btn" ontouchstart="toggleAim()">🎯</button>
+      <button class="act-btn grenade-btn" onclick="throwGrenade()">💣</button>
+      <button class="act-btn reload-btn" onclick="reload()">🔄</button>
+      <button class="act-btn crouch-btn" onclick="toggleCrouch()">⬇️</button>
+      <button class="act-btn run-btn" ontouchstart="startRun()" ontouchend="stopRun()">💨</button>
+    </div>
+  </div>
+
+  <!-- PAUSE MENU -->
+  <div id="pause-menu" class="hidden">
+    <div class="pause-box">
+      <h2>متوقف مؤقتاً</h2>
+      <button onclick="resumeGame()">▶ متابعة</button>
+      <button onclick="showSettings()">⚙️ الإعدادات</button>
+      <button onclick="quitToMenu()">🚪 القائمة الرئيسية</button>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="game-over" class="hidden">
+    <div class="gameover-box">
+      <h2 id="gameover-title">انتهت اللعبة</h2>
+      <div class="go-stats">
+        <div>النقاط: <span id="go-score">0</span></div>
+        <div>القتلى: <span id="go-kills">0</span></div>
+        <div>الوقت: <span id="go-time">00:00</span></div>
+      </div>
+      <button onclick="restartGame()">🔄 إعادة المحاولة</button>
+      <button onclick="quitToMenu()">🏠 القائمة الرئيسية</button>
+    </div>
+  </div>
+
+  <!-- PAUSE BTN -->
+  <button class="pause-toggle" onclick="togglePause()">⏸</button>
+</div>
+
+<script src="js/engine.js"></script>
+<script src="js/game.js"></script>
+<script src="js/ui.js"></script>
+</body>
+</html>
