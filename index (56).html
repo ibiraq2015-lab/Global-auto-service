@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>سويها كود — فكرتك إلى تطبيق</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#0b1020;color:#fff}
+a{color:inherit;text-decoration:none}
+.nav{height:70px;display:flex;align-items:center;justify-content:space-between;padding:0 7%;border-bottom:1px solid #202943;background:#0d1326;position:sticky;top:0;z-index:5}
+.logo{font-size:25px;font-weight:800;color:#6ee7ff}.nav span{color:#9aa6c0;margin:0 10px}
+.hero{padding:90px 7% 60px;text-align:center;background:radial-gradient(circle at top,#17264d,#0b1020 55%)}
+.badge{display:inline-block;padding:8px 15px;border:1px solid #294269;border-radius:30px;color:#8eeaff;background:#101d35}
+h1{font-size:clamp(40px,7vw,78px);margin:25px 0 15px;line-height:1.05}
+.hero h1 b{color:#6ee7ff}.hero p{font-size:20px;color:#aab5cb;max-width:720px;margin:0 auto 30px;line-height:1.8}
+.prompt{max-width:800px;margin:auto;background:#111a30;border:1px solid #2b3856;border-radius:18px;padding:12px;display:flex;gap:10px}
+.prompt input{flex:1;background:transparent;border:0;outline:0;color:white;font-size:17px;padding:15px}
+button{border:0;border-radius:12px;padding:14px 22px;background:#38c7e8;color:#06111a;font-weight:800;cursor:pointer}
+section{padding:65px 7%}.title{text-align:center;margin-bottom:35px}.title h2{font-size:35px;margin:0 0 10px}.title p{color:#8f9bb2}
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:18px}
+.card{background:#11182b;border:1px solid #222e49;border-radius:18px;padding:25px;transition:.2s}
+.card:hover{transform:translateY(-4px);border-color:#3cc9e8}.icon{font-size:32px}.card h3{margin:15px 0 8px}.card p{color:#95a1b8;line-height:1.7}
+.builder{display:grid;grid-template-columns:1fr 1.5fr;gap:20px;direction:ltr}
+.panel{background:#0f1728;border:1px solid #26334e;border-radius:18px;overflow:hidden}.panel h3{margin:0;padding:16px;border-bottom:1px solid #26334e}
+.files{padding:15px;direction:ltr;color:#a9b6cc;font-family:monospace;line-height:2}.files b{color:#fff}.preview{min-height:310px;padding:25px;direction:rtl}
+.preview .site{background:#18233a;border-radius:15px;padding:25px;text-align:center}
+textarea{width:100%;height:130px;background:#0a1020;color:#dbeafe;border:1px solid #2b3856;border-radius:12px;padding:15px;resize:vertical}
+.actions{display:flex;gap:10px;margin-top:10px;flex-wrap:wrap}
+footer{text-align:center;padding:35px;color:#71809b;border-top:1px solid #202943}
+@media(max-width:750px){.builder{grid-template-columns:1fr}.prompt{flex-direction:column}.nav span{display:none}}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="logo">⚡ سويها كود</div>
+  <div><span>المشاريع</span><span>التعلم</span><span>المجتمع</span><button onclick="scrollToBuilder()">ابدأ الآن</button></div>
+</nav>
+
+<header class="hero">
+  <div class="badge">AI Developer Platform</div>
+  <h1>فكرتك ← <b>كود</b> ← تطبيق حقيقي</h1>
+  <p>منصة تساعدك على تحويل فكرة التطبيق إلى مشروع برمجي، مع محرر كود، معاينة مباشرة، ومساعد ذكي.</p>
+  <div class="prompt">
+    <input id="idea" placeholder="مثال: أريد إنشاء متجر إلكتروني..." />
+    <button onclick="generateProject()">✨ إنشاء المشروع</button>
+  </div>
+</header>
+
+<section>
+  <div class="title"><h2>ماذا تقدم سويها كود؟</h2><p>كل أدوات المطور في تجربة واحدة</p></div>
+  <div class="grid">
+    <div class="card"><div class="icon">🤖</div><h3>AI Developer</h3><p>اكتب ما تريد بناءه ودع المساعد يقترح هيكل المشروع والكود.</p></div>
+    <div class="card"><div class="icon">💻</div><h3>محرر كود</h3><p>اكتب وعدّل ملفات مشروعك مباشرة من المتصفح.</p></div>
+    <div class="card"><div class="icon">⚡</div><h3>معاينة مباشرة</h3><p>شاهد نتيجة التعديلات في الوقت الحقيقي.</p></div>
+    <div class="card"><div class="icon">🎓</div><h3>تعلم البرمجة</h3><p>اطلب شرح أي جزء من الكود وحوّله إلى درس وتمرين.</p></div>
+    <div class="card"><div class="icon">🚀</div><h3>مشاريع جاهزة</h3><p>ابدأ من متجر أو مدونة أو SaaS أو تطبيق AI.</p></div>
+    <div class="card"><div class="icon">🌍</div><h3>مجتمع المطورين</h3><p>انشر مشروعك وشارك الكود والأفكار مع الآخرين.</p></div>
+  </div>
+</section>
+
+<section id="builder">
+  <div class="title"><h2>جرّب فكرة التطبيق</h2><p>هذه نسخة تجريبية من واجهة سويها كود</p></div>
+  <div class="builder">
+    <div class="panel">
+      <h3>📁 Project</h3>
+      <div class="files">
+        <b>sawiha-code-project/</b><br>
+        ├── frontend/<br>
+        │ ├── index.html<br>
+        │ ├── style.css<br>
+        │ └── app.js<br>
+        ├── backend/<br>
+        │ └── server.js<br>
+        └── database/
+      </div>
+      <div style="padding:15px">
+        <textarea id="code" placeholder="اكتب فكرة أو تعديلًا..."></textarea>
+        <div class="actions">
+          <button onclick="applyIdea()">تطبيق التعديل</button>
+          <button onclick="explain()">🤖 اشرح لي</button>
+        </div>
+      </div>
+    </div>
+    <div class="panel">
+      <h3>🖥️ Preview</h3>
+      <div class="preview">
+        <div class="site">
+          <h2 id="previewTitle">مشروعك الجديد</h2>
+          <p id="previewText">اكتب فكرتك واضغط «إنشاء المشروع» لتجربة الواجهة.</p>
+          <button onclick="alert('هذه معاينة تجريبية')">ابدأ المشروع</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="title"><h2>مسار بناء التطبيق</h2></div>
+  <div class="grid">
+    <div class="card"><h3>01 — الفكرة</h3><p>اكتب وصفًا بسيطًا لما تريد بناءه.</p></div>
+    <div class="card"><h3>02 — التخطيط</h3><p>حدد الصفحات والوظائف والتقنيات المناسبة.</p></div>
+    <div class="card"><h3>03 — الكود</h3><p>أنشئ الملفات وابدأ التطوير.</p></div>
+    <div class="card"><h3>04 — الاختبار</h3><p>راجع الأخطاء وشغّل المعاينة.</p></div>
+    <div class="card"><h3>05 — النشر</h3><p>بعد ربط Backend وHosting يمكن نشر المشروع.</p></div>
+  </div>
+</section>
+
+<footer>© 2026 سويها كود — جميع الحقوق محفوظة لـ Ibrahim Al Rawi</footer>
+
+<script>
+function scrollToBuilder(){document.getElementById('builder').scrollIntoView({behavior:'smooth'})}
+function generateProject(){
+  const idea=document.getElementById('idea').value.trim();
+  if(!idea){alert('اكتب فكرة التطبيق أولاً');return}
+  document.getElementById('previewTitle').textContent=idea.slice(0,45);
+  document.getElementById('previewText').textContent='تم إنشاء تصور أولي لمشروعك. هذه نسخة Frontend تجريبية.';
+  document.getElementById('code').value='أضف إلى المشروع: '+idea;
+  scrollToBuilder();
+}
+function applyIdea(){
+  const text=document.getElementById('code').value.trim();
+  if(!text){alert('اكتب التعديل أولاً');return}
+  document.getElementById('previewText').textContent='تم تطبيق التعديل تجريبيًا: '+text.slice(0,100);
+  document.getElementById('code').value='';
+}
+function explain(){
+  alert('في النسخة الكاملة يمكن ربط هذه الوظيفة بواجهة AI لشرح الكود، اكتشاف الأخطاء وإنشاء التمارين.');
+}
+</script>
+</body>
+</html>
